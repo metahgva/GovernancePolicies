@@ -1,0 +1,120 @@
+classification:
+  rule: |
+    var ans string
+    ans = "Low"
+    if classificationInputs["model-risk"].(string) == "High" || classificationInputs["change-type"].(string) == "Major" {
+      ans = "High"
+    }
+    return ans
+  artifacts:
+   - model-risk
+   - change-type
+approvers:
+    - integration-test
+stages:
+  - name: Business cases
+    evidenceSet:
+      - id: Local.guidance
+        name: ''
+        description: ''
+        definition:
+          - artifactType: guidance
+            details:
+              text: >-
+                The type of business case as well as model risk and complexity
+                can determine which process has to be followed. [Learn
+                More](https://ournistpolicyreferenceurl.com)
+      - id: Local.type-of-development
+        name: Type of Development
+        description: Describe the type of development
+        definition:
+          - artifactType: input
+            details:
+              label: What is the type of the business case?
+              type: radio
+              options:
+                - New model development
+                - Model change
+          - artifactType: input
+            details:
+              label: What are the expected business benefits
+              type: textinput
+              helpText: Explain The Benefit
+      - id: Local.model-risk
+        name: Model Risk
+        description: Describe the risk of the model
+        definition:
+          - artifactType: input
+            aliasForClassification: model-risk
+            details:
+              label: How would you rate the model risk?
+              type: radio
+              options:
+                - High
+                - Low
+              tooltip: guidance on how to rate the model risk within the organization
+          - artifactType: input
+            aliasForClassification: change-type
+            details:
+              label: To what extent do you expect that the model output will change?
+              type: radio
+              options:
+                - Major
+                - Moderate
+                - Minor
+  - name: Requirement gathering
+    evidenceSet:
+      - id: Local.define-requirement
+        name: Define Requirement
+        description: Describe the requirement
+        definition:
+          - artifactType: input
+            details:
+              label: List all the requirements
+              type: textarea
+      - id: Local.change-plan
+        name: Define the change plan
+        description: Describe the change plan
+        definition:
+          - artifactType: input
+            details:
+              label: Describe the change plan
+              type: textarea
+      - id: Local.Test
+        name: Test visibility rule
+        description: Test visibility rule question
+        definition:
+          - artifactType: input
+            details:
+              label: You can only see this when classification is High
+              type: textarea
+        visibilityRule: classificationValue == "High"
+  - name: Validation
+    approvals:
+      - name: Validation sign off
+        approvers:
+          - integration-test
+        evidence:
+          id: Local.validation-approval-body
+          name: Sign-off
+          description: The checklist for approvals
+          definition:
+            - artifactType: input
+              details:
+                label: Have you read the model validation reports?
+                type: radio
+                options:
+                  - label: 'Yes'
+                    value: 'Yes'
+                  - label: 'No'
+                    value: 'No'
+  - name: Deployment
+    evidenceSet:
+      - id: Local.monitoring-plan
+        name: Monitoring Plan
+        description: Describe the monitoring plan
+        definition:
+          - artifactType: input
+            details:
+              label: Describe the monitoring plan
+              type: textarea
